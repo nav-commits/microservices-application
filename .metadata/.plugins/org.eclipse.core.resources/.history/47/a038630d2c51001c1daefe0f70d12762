@@ -1,0 +1,53 @@
+package com.example.demo;
+
+import javax.persistence.Entity;
+
+@Entity
+public class ProductInfoMore {
+	
+	private Long productId;
+	private String imageurl;
+	private String productname;
+	private int quantity;
+	
+	public ProductInfoMore(Long productId, String imageurl, String productname, int quantity) {
+		this.productId = productId;
+		this.imageurl = imageurl;
+		this.productname = productname;
+		this.quantity = quantity;
+	}
+	
+	public ProductInfoMore() {
+
+	}
+	
+	
+	
+	public Long getProductId() {
+		return productId;
+	}
+	public void setProductId(Long productId) {
+		this.productId = productId;
+	}
+	public String getImageurl() {
+		return imageurl;
+	}
+	public void setImageurl(String imageurl) {
+		this.imageurl = imageurl;
+	}
+	public String getProductname() {
+		return productname;
+	}
+	public void setProductname(String productname) {
+		this.productname = productname;
+	}
+	public int getQuantity() {
+		return quantity;
+	}
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+
+	
+
+}

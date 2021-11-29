@@ -1,0 +1,75 @@
+package com.example.demo;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.GeneratedValue;
+
+
+@Entity
+@Table(name = "ProductInfo")
+public class ProductInfo {
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	@Id
+	@Column(name = "ProductId")
+	private Long productid;
+    
+	@Column(name = "ImageUrl")
+	private String imageurl;
+   
+	@Column(name = "ProductName")
+	private String productname;
+    
+	@Column(name = "Quantity")
+	private int quantity;
+
+
+	public ProductInfo(String productname, String imageurl, int quantity, Long productid) {
+		super();
+		this.productid = productid;
+		this.imageurl = imageurl;
+		this.productname = productname;
+		this.quantity = quantity;
+
+	}
+
+	public ProductInfo() {
+
+	}
+
+	public Long getProductid() {
+		return productid;
+	}
+
+	public void setProductid(Long productid) {
+		this.productid = productid;
+	}
+
+	public String getImageurl() {
+		return imageurl;
+	}
+
+	public void setImageurl(String imageurl) {
+		this.imageurl = imageurl;
+	}
+
+	public String getProductname() {
+		return productname;
+	}
+
+	public void setProductname(String productname) {
+		this.productname = productname;
+	}
+
+	public int getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+
+
+}
