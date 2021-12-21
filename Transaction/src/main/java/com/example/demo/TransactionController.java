@@ -1,88 +1,85 @@
 package com.example.demo;
+
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
-@CrossOrigin(origins = "http://localhost:3000")
-@RestController
-public class TransactionController {
+    @RestController
+    @CrossOrigin(origins = "*", allowedHeaders = "*")
+    public class TransactionController {
 
 	@Autowired
 	private RestTemplate restTemplate;
+	
 
 	@Autowired
 	TransactionRepository transactionRepository;
 
 	// get Transactions
-	@PostMapping("/Transactions/{userid}")
-	public List<Transactions> Transactions(@PathVariable Long userid) {
-
-		// step 1 get product pricing
-		String uriProductPricing = "http://Product-Pricing-Service/ProductPricing/" + userid;
-		UsersProductsPricing usersProductsPricing = restTemplate.getForObject(uriProductPricing,
-				UsersProductsPricing.class);
-
-		// step 2 get pricing and product for user
-		return usersProductsPricing.getUsersProductsPricing().stream().map(productpricing -> {
-			ProductInfo productinfo = restTemplate.getForObject(
-					"http://Product-Info-Service/Product/ProductInfo/" + productpricing.getProductid(),
-					ProductInfo.class);
-			return transactionRepository.save(new Transactions(productinfo.getImageurl(), productinfo.getProductname(),
-					productinfo.getQuantity(), productinfo.getProductid(), productpricing.getPrice()));
-		}).collect(Collectors.toList());
+    @HystrixCommand(fallbackMethod = "getFallbackTransaction")
+	@PostMapping("/Transactions/{userid}/{productid}")
+	 public ResponseEntity<?>  Transactions (@PathVariable Long userid, @PathVariable Long productid) {
+    	
+        // step 1 call productpricing microservice
+    	String urlProductPricing = "http://Product-Pricing-Service/ProductPricing/" + productid;
+    	UsersProductsPricing usersProductsPricing = restTemplate.getForObject(urlProductPricing,UsersProductsPricing.class);
+        
+    	Transactions transaction = new Transactions();
+		usersProductsPricing.getProductsPricing().stream().forEach(productpricing -> {
+		
+		//step 2 call productpricing productinfo
+		ProductInfo productinfo = restTemplate.getForObject("http://Product-Info-Service/Product/"+ productid, ProductInfo.class);
+		transaction.setUserid(userid);
+		transaction.setProductid(productpricing.getProductid());
+		transaction.setImageurl(productinfo.getImageurl());
+		transaction.setProductname(productinfo.getProductname());
+		transaction.setQuantity(productinfo.getQuantity());
+		transaction.setPrice(productpricing.getPrice());
+		});
+		
+		// step 3 save it into the transactions database
+		transactionRepository.save(transaction);
+		return ResponseEntity.ok(transaction);
 
 	}
 
 	// find transaction ById
-	@GetMapping("/Transaction/{userid}")
-	public Optional<com.example.demo.Transactions> getProductInfo(@PathVariable Long userid) {
-		return transactionRepository.findById(userid);
-
+	   @GetMapping("/Transaction/{userid}")
+	    public List<Transactions> getTransaction(@PathVariable Long userid) {
+		return transactionRepository.findByuserid(userid);
 	}
 	
-	// find All
-		@GetMapping("/Transactions")
-		public List<Transactions> getAllTransactions() {
-			return transactionRepository.findAll();
-
-		}
 	
 
-	// Get Transactions
-	@GetMapping("/Transactions/{userid}")
-	@HystrixCommand(fallbackMethod = "getFallbackTransaction")
-	public List<Transactions> getTransactions(@PathVariable Long userid) {
-
-		// step 1 get product pricing
-		String uriProductPricing = "http://Product-Pricing-Service/ProductPricing/" + userid;
-		UsersProductsPricing usersProductsPricing = restTemplate.getForObject(uriProductPricing,
-				UsersProductsPricing.class);
-
-		// step 2 get pricing and product for user
-		return usersProductsPricing.getUsersProductsPricing().stream().map(productpricing -> {
-			ProductInfo productinfo = restTemplate.getForObject(
-					"http://Product-Info-Service/Product/ProductInfo/" + productpricing.getProductid(),
-					ProductInfo.class);
-			return new Transactions(productinfo.getImageurl(), productinfo.getProductname(), productinfo.getQuantity(),
-					productinfo.getProductid(), productpricing.getPrice());
-		}).collect(Collectors.toList());
-
-	}
-
-	// fallback method for Transactions
-	public List<Transactions> getFallbackTransaction(@PathVariable Long userid) {
-		return Arrays.asList(new Transactions("no product images", "productname", 0, (long) 0, 0));
-	}
+        //fallback method for if transaction fails
+	    public ResponseEntity<?> getFallbackTransaction(@PathVariable("userid") Long userid,@PathVariable("productid") Long productid) {
+	    	
+	    	Transactions transaction = new Transactions();
+			transaction.setUserid((long) 0);
+			transaction.setProductid((long) 0);
+			transaction.setImageurl("Image not found");
+			transaction.setProductname("product name not found");
+			transaction.setQuantity(0);
+			transaction.setPrice(0);
+			transaction.setCreatedAt(null);
+			
+			return ResponseEntity.ok(transaction);
+	    	
+	  }
 
 }

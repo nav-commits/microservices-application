@@ -8,29 +8,37 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
+@Table(name = "productpricing")
 public class ProductPricing {
+	
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name = "productpricingid")
+	private Long productpricingid;
+	@Column(name = "productid")
 	private Long productid;
-	@Column
+	@Column(name = "price")
 	private int price;
 
 
+	public Long getProductpricingid() {
+		return productpricingid;
+	}
+	public void setProductpricingid(Long productpricingid) {
+		this.productpricingid = productpricingid;
+	}
 	public Long getProductid() {
 		return productid;
 	}
-
 	public void setProductid(Long productid) {
 		this.productid = productid;
 	}
-
 	public int getPrice() {
 		return price;
 	}
-
 	public void setPrice(int price) {
 		this.price = price;
 	}
+
 
 }

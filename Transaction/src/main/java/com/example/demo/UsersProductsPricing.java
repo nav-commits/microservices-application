@@ -4,22 +4,20 @@ import java.util.List;
 
 public class UsersProductsPricing {
 	
-	private int userId;
-	List<ProductPricing> usersProductsPricing;
+	List<ProductPricing> productsPricing;
 
-	public int getUserId() {
-		return userId;
-	}
-	public void setUserId(int userId) {
-		this.userId = userId;
-	}
-	public List<ProductPricing> getUsersProductsPricing() {
-		return usersProductsPricing;
-	}
-	public void setUsersProductsPricing(List<ProductPricing> usersProductsPricing) {
-		this.usersProductsPricing = usersProductsPricing;
+
+
+	public void setProductsPricing(List<ProductPricing> productsPricing) {
+		this.productsPricing = productsPricing;
 	}
 
+	public List<ProductPricing> getProductsPricing() {
+		// TODO Auto-generated method stub
+		return productsPricing;
+	}
+	
+	
 
 
 }
