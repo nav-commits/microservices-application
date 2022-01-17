@@ -21,7 +21,7 @@ public class Transactions {
 	@Column(name = "Transactionid")
 	private Long Transactionid;
 	@Column(name = "userid")
-	private Long userid;
+	private String userid;
 	@Column(name = "productid")
 	private Long productid;
 	@Column(name = "imageurl")
@@ -37,7 +37,7 @@ public class Transactions {
 	private Date createdAt = new Date();
 	
 	
-	public Transactions(Long Transactionid, Long userid, Long productid, String imageurl, String productname,int quantity, int price, Date createdAt) {
+	public Transactions(Long Transactionid, String userid, Long productid, String imageurl, String productname,int quantity, int price, Date createdAt) {
 		
 		this.Transactionid = Transactionid;
 		this.userid = userid;
@@ -63,10 +63,10 @@ public class Transactions {
 	public void setTransactionid(Long Transactionid) {
 		this.Transactionid = Transactionid;
 	}
-	public Long getUserid() {
+	public String getUserid() {
 		return userid;
 	}
-	public void setUserid(Long userid) {
+	public void setUserid(String userid) {
 		this.userid = userid;
 	}
 	public Long getProductid() {

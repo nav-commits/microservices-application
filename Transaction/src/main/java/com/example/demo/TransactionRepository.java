@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TransactionRepository extends JpaRepository<Transactions, Long> {
 
-	List<Transactions> findByuserid(Long userid);
+	List<Transactions> findByuserid(String userid);
 
 
 
