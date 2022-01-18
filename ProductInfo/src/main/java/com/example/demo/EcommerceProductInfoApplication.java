@@ -19,7 +19,7 @@ public class EcommerceProductInfoApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(EcommerceProductInfoApplication.class, args);
 	}
-	
+	@LoadBalanced
 	@Bean
 	RestTemplate rest() {
 		RestTemplate rest = new RestTemplate();

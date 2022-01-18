@@ -1,13 +1,8 @@
 package com.example.demo;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.bouncycastle.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,12 +13,9 @@ import org.springframework.web.client.RestTemplate;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
-import javax.annotation.security.RolesAllowed;
-import javax.management.relation.Role;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
+
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -46,22 +38,18 @@ public class ProductsInfoController {
 
 	// get product pricing by productid
 	 @RequestMapping(value = {"/ProductInfo/{productid}"})
-//     @HystrixCommand(commandProperties = {
-//             @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "9000")
-//     },
-//             threadPoolKey = "prim",
-//             fallbackMethod = "getFallbackProduct")
+      @HystrixCommand(fallbackMethod = "getFallbackProduct")
 	 public List<ProductInfo> getProduct(@PathVariable Long productid) {
 		 
 		 
-		String urlProductPricing = "http://localhost:8501/ProductPricing/" + productid;
+		String urlProductPricing = "http://Product-Pricing-Service/ProductPricing/" + productid;
 		UsersProductsPricing usersProductsPricing = restTemplate.getForObject(urlProductPricing,
 				UsersProductsPricing.class);
 
 		return usersProductsPricing.getProductsPricing().stream().map(productpricing -> {
 
 			ProductInfo productinfo = restTemplate
-					.getForObject("http://localhost:8500/Product/" + productpricing.getProductid(), ProductInfo.class);
+					.getForObject("http://Product-Info-Service/Product/" + productpricing.getProductid(), ProductInfo.class);
 
 			ProductInfo productInfoObject = new ProductInfo();
 			productInfoObject.setProductinfoid(productinfo.getProductinfoid());
@@ -78,20 +66,16 @@ public class ProductsInfoController {
 	
 	// get All Products
 	@GetMapping("/ProductInfo")
-//@HystrixCommand(commandProperties = {
-//        @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "9000")
-//},
-//        threadPoolKey = "prim",
-//        fallbackMethod = "getFallbackProductInfo")
+    @HystrixCommand(fallbackMethod = "getFallbackProductInfo")
 	public List<ProductInfo> getProducts() {
-		String uriProductPricing = "http://localhost:8501/ProductPricing";
+		String uriProductPricing = "http://Product-Pricing-Service/ProductPricing";
 		UsersProductsPricing usersProductsPricings = restTemplate.getForObject(uriProductPricing,
 				UsersProductsPricing.class);
 
 		return usersProductsPricings.getProductsPricing().stream().map(productpricing -> {
 
 			ProductInfo productinfo = restTemplate
-					.getForObject("http://localhost:8500/Product/" + productpricing.getProductid(), ProductInfo.class);
+					.getForObject("http://Product-Info-Service/Product/" + productpricing.getProductid(), ProductInfo.class);
 
 			ProductInfo productInfoObject = new ProductInfo();
 			productInfoObject.setProductinfoid(productinfo.getProductinfoid());
@@ -109,20 +93,24 @@ public class ProductsInfoController {
 	
 	
 	// fallback method for a single product if productpricing microservice is down
-//	public List<ProductInfo> getFallbackProduct(@PathVariable Long productid) {
-//	return java.util.Arrays.asList(new ProductInfo((long)0, "no image", "no productname", 0, 0, (long)0));   
-//	  	  
-//	}
+	public List<ProductInfo> getFallbackProduct(@PathVariable Long productid, Throwable t) {
+		System.out.print(" the message " + t.getMessage());
+		System.out.print("the cause " + t.getCause());
+	return java.util.Arrays.asList(new ProductInfo((long)0, "no image", "no productname", 0, 0, (long)0));   
+	  	  
+	}
 	
-//	// fallback method for all products if productpricing microservice is down
-//	public List<ProductInfo> getFallbackProductInfo() {
-//		return java.util.Arrays.asList(new ProductInfo((long)0, "no image", "no productname", 0, 0, (long)0));   
-//		  	  
-//		}
-//	
+	// fallback method for all products if productpricing microservice is down
+	public List<ProductInfo> getFallbackProductInfo(Throwable t) {
+		System.out.print(" the message " + t.getMessage());
+		System.out.print(" the cause " + t.getCause());
+		return java.util.Arrays.asList(new ProductInfo((long)0, "no image", "no productname", 0, 0, (long)0));   
+		  	  
+		}
+	
 	 
 
-//	// find a product by productid
+	// find a product by productid
 	   @GetMapping("/Product/{productid}")
 	   public ProductInfo getSingleProduct(@PathVariable  Long productid) {
 		   return productInfoRepository.findByProductid(productid);
