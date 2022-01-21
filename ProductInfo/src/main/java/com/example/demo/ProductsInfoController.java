@@ -14,6 +14,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 
 
 
@@ -38,7 +39,9 @@ public class ProductsInfoController {
 
 	// get product pricing by productid
 	 @RequestMapping(value = {"/ProductInfo/{productid}"})
-      @HystrixCommand(fallbackMethod = "getFallbackProduct")
+      @HystrixCommand(fallbackMethod = "getFallbackProduct",commandProperties = {
+    	        @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE")
+      })
 	 public List<ProductInfo> getProduct(@PathVariable Long productid) {
 		 
 		 
@@ -66,7 +69,9 @@ public class ProductsInfoController {
 	
 	// get All Products
 	@GetMapping("/ProductInfo")
-    @HystrixCommand(fallbackMethod = "getFallbackProductInfo")
+    @HystrixCommand(fallbackMethod = "getFallbackProductInfo",commandProperties = {
+	        @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE")
+  })
 	public List<ProductInfo> getProducts() {
 		String uriProductPricing = "http://Product-Pricing-Service/ProductPricing";
 		UsersProductsPricing usersProductsPricings = restTemplate.getForObject(uriProductPricing,
@@ -93,17 +98,13 @@ public class ProductsInfoController {
 	
 	
 	// fallback method for a single product if productpricing microservice is down
-	public List<ProductInfo> getFallbackProduct(@PathVariable Long productid, Throwable t) {
-		System.out.print(" the message " + t.getMessage());
-		System.out.print("the cause " + t.getCause());
+	public List<ProductInfo> getFallbackProduct(@PathVariable Long productid) {
 	return java.util.Arrays.asList(new ProductInfo((long)0, "no image", "no productname", 0, 0, (long)0));   
 	  	  
 	}
 	
 	// fallback method for all products if productpricing microservice is down
-	public List<ProductInfo> getFallbackProductInfo(Throwable t) {
-		System.out.print(" the message " + t.getMessage());
-		System.out.print(" the cause " + t.getCause());
+	public List<ProductInfo> getFallbackProductInfo() {
 		return java.util.Arrays.asList(new ProductInfo((long)0, "no image", "no productname", 0, 0, (long)0));   
 		  	  
 		}

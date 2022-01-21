@@ -28,7 +28,9 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 	TransactionRepository transactionRepository;
 
 	// get Transactions
-    @HystrixCommand(fallbackMethod = "getFallbackTransaction")
+    @HystrixCommand(fallbackMethod = "getFallbackTransaction",commandProperties = {
+	        @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE")
+  })
 	@PostMapping("/Transactions/{userid}/{productid}")
 	 public ResponseEntity<?>  Transactions (@PathVariable String userid, @PathVariable Long productid) {
 
@@ -64,10 +66,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 	
 
 //        //fallback method for if transaction fails
-	    public ResponseEntity<?> getFallbackTransaction(@PathVariable("userid") String userid,@PathVariable("productid") Long productid, Throwable t) {
-	    	
-	    	System.out.print(" the message " + t.getMessage());
-			System.out.print("the cause " + t.getCause());
+	    public ResponseEntity<?> getFallbackTransaction(@PathVariable("userid") String userid,@PathVariable("productid") Long productid) {
 			
 	    	Transactions transaction = new Transactions();
 			transaction.setUserid("0");
